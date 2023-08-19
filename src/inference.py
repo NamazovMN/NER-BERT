@@ -1,63 +1,87 @@
-from model import NERClassifier
-from preprocess import Preprocess
-from process import Process
-import pandas as pd
-import torch
+import nltk
 import os
+import pandas as pd
 import pickle
+import torch
+
 from nltk.tokenize import word_tokenize
+from src.classifier import NERClassifierBERT
+from src.process import DataProcess
+from transformers import DataCollatorForTokenClassification
+
+nltk.download('punkt')
+
+
 class Inference:
-    def __init__(self, exp_num, device):
-        self.exp_num = exp_num
+    """
+    Class is utilized to infer with the pre-trained model as a playground environment
+    """
+
+    def __init__(self, hp: dict, process: DataProcess, device: str, infer_parameters: dict):
+        """
+        Method is utilized as an initializer to set the inference environment
+        :param hp: hyperparameters for the model setup
+        :param process: data processing object will be utilized to set the model input
+        :param device: can either be cuda or cpu
+        :param infer_parameters: dictionary which includes inference parameters
+        """
+        self.hp = hp
         self.device = device
-
-        self.experiment_dir = self.set_experiment_dir()
-        self.experiment_parameters = self.get_experiment_parameters()
-        self.vocabulary, self.id2lab = self.get_vocabulary()
-
+        self.process = process
+        self.infer_parameters = infer_parameters
+        self.vocabulary = self.process.tokenizer.vocab
+        self.collator = self.set_collator()
+        self.experiment_dir = self.set_experiment_environment()
         self.classifier = self.set_model()
 
+    def set_experiment_environment(self) -> str:
+        """
+        Method is utilized to set experiment environment which data will be used for model setup
+        :return: directory for the experiment data
+        """
+        experiment_path = os.path.join(f'results/experiment_{self.infer_parameters["experiment_num"]}')
+        return experiment_path
 
-    def set_experiment_dir(self):
-        results_dir = '../results'
-        experiment_dir = os.path.join(results_dir, f'experiment_{self.exp_num}')
-        if not os.path.exists(experiment_dir):
-            raise NotImplementedError("No such model with given details! Check them first!")
-        return experiment_dir
+    def set_collator(self) -> DataCollatorForTokenClassification:
+        """
+        Method is utilized to create data collator object for the experiment
+        :return: DataCollator object will be used for post-processing purposes
+        """
+        return DataCollatorForTokenClassification(
+            tokenizer=self.process.tokenizer,
+            max_length=self.hp['max_length'],
+            padding='max_length'
+        )
 
-    def get_experiment_parameters(self):
-        parameters_path = os.path.join(self.experiment_dir, 'outputs/parameters.pickle')
-        with open(parameters_path, 'rb') as params_dir:
-            parameters = pickle.load(params_dir)
-        return parameters
+    def set_model(self) -> NERClassifierBERT:
+        """
+        Method is utilized to set the model
+        :return: Classifier for the given experiment
+        """
+        return NERClassifierBERT(self.hp).to(self.device)
 
-    def get_vocabulary(self):
-        cased = self.experiment_parameters['cased']
-        stopwords = self.experiment_parameters['stopwords']
-        punctuation = self.experiment_parameters['punctuation']
-        ds_path = f"../dataset{'_punct' if punctuation else ''}{'_stops' if stopwords else ''}" \
-                  f"{'_cased' if cased else ''}"
-        vocabulary_path = os.path.join(ds_path, 'vocab_info.pickle')
+    def get_best_epoch(self, user_choice: str) -> int:
+        """
+        Method is utilized to get epoch value for the specific user choice
+        :param user_choice: can be f1_macro, dev_acc, dev_loss
+        :return: integer value for epoch which corresponds to the best value of the given choice
+        """
+        results_dict = self.load_model_results()
+        data = pd.DataFrame(results_dict)
+        if user_choice == 'dev_loss':
+            choice = min(data[user_choice])
+        else:
+            choice = max(data[user_choice])
+        request = data[data[user_choice] == choice]
+        epoch = request['epoch'].item()
+        print(f'According to the best choice selection, epoch {epoch} was chosen!')
+        return epoch
 
-        if not os.path.exists(vocabulary_path):
-            raise NotImplementedError('Vocabulary cannot be found! Make sure the path is correct!')
-        with open(vocabulary_path, 'rb') as vocab_data:
-            vocabulary_info = pickle.load(vocab_data)
-        id2lab = {idx: lab for lab, idx in vocabulary_info['lab2id'].items()}
-        return vocabulary_info['vocabulary'], id2lab
-
-    def encode_text(self, text):
-        return [self.vocabulary[token] if token in self.vocabulary.keys() else self.vocabulary['<UNK>'] for token in text]
-
-    def decode_prediction(self, output):
-        return [self.id2lab[prediction] for prediction in output]
-
-
-    def set_model(self):
-        hp = self.experiment_parameters['hyperparams']
-        return NERClassifier(hp, self.vocabulary).to(self.device)
-
-    def load_model_results(self):
+    def load_model_results(self) -> dict:
+        """
+        Method is utilized to load model results, which are collected during the training process
+        :return: dictionary which holds each epoch's results
+        """
         results_path = os.path.join(self.experiment_dir, 'outputs/results.pickle')
         if not os.path.exists(results_path):
             raise FileNotFoundError('No such directory, for this you need to train the model first!')
@@ -66,7 +90,12 @@ class Inference:
             result_dict = pickle.load(result_data)
         return result_dict
 
-    def load_model(self, epoch_choice):
+    def load_model(self, epoch_choice: int) -> None:
+        """
+        Method is utilized to load model for the given epoch choice
+        :param epoch_choice: integer specifies which epoch's model will be loaded
+        :return: None
+        """
         result_dict = self.load_model_results()
         data = pd.DataFrame(result_dict)
         ckpt_dir = os.path.join(self.experiment_dir, 'checkpoints')
@@ -84,8 +113,12 @@ class Inference:
         self.classifier.load_state_dict(torch.load(model_path))
         self.classifier.eval()
 
-    def decision_maker(self, project_parameters):
-
+    def decision_maker(self, project_parameters: dict) -> int:
+        """
+        Method is utilized to select epoch according to the user's choices for model loading scenario
+        :param project_parameters: experiment parameters in which user's choice is kept for loading decision
+        :return: epoch choice according to the provided information
+        """
         if project_parameters['load_best']:
             if project_parameters['epoch_choice']:
                 print(
@@ -97,37 +130,146 @@ class Inference:
         else:
             return project_parameters['epoch_choice']
 
-    def get_best_epoch(self, user_choice):
-        results_dict = self.load_model_results()
-        data = pd.DataFrame(results_dict)
-        if user_choice == 'dev_loss':
-            choice = min(data[user_choice])
-        else:
-            if user_choice == 'f1_score':
-                user_choice = 'f1_macro'
-            choice = max(data[user_choice])
-        request = data[data[user_choice] == choice]
-        epoch = request['epoch'].item()
-        print(f'According to the best choice selection, epoch {epoch} was chosen!')
-        return epoch
+    @staticmethod
+    def pretty_combiner(sequence: list) -> list:
+        """
+        Method is utilized to prevent mis-tokenization because of combinations of apostrophes and specific examples such
+        as 'gonna' and 'wanna'
+        :param sequence: list of tokens which were collected by nltk tokenizer
+        :return: list of tokens which can be seen as more correct combination
+        """
+        result = list()
+        na_list = ['gon', 'wan']
+        shortcuts = ["'s", "'d", "n't", "'m", "'ve", "'ll", "na"]
+        count = 0
+        for idx, token in enumerate(sequence):
+            if token not in shortcuts or idx == 0:
+                result.append(token)
+                count += 1
+            else:
+                if token == 'na' and result[count - 1] not in na_list:
+                    result.append(token)
+                else:
+                    new_token = result[count - 1] + token
+                    result[count - 1] = new_token
+        return result
 
-    def process_text(self, input_sequence):
-        length = len(input_sequence)
-        max_len = self.experiment_parameters['max_length']
-        sequence = input_sequence[0: max_len] if length > max_len else input_sequence + ['<PAD>'] * (max_len - length)
-        return self.encode_text(sequence)
+    @staticmethod
+    def make_alignment(original_tokens: list, bert_tokens: list) -> tuple:
+        """
+        Method is utilized to make alignment between clean sequence and model input sequence. Example:
+        Clean sequence: ["I'm", "going", "home", "."]
+        Model input: ["[CLS]", "I", "'", "m", "going", "home", ".", "[SEP]"]
+        Our desired output is in the length of the clean sequence, thus predictions of 'I', ''', 'm' will be processed
+        in specific manner. In order to eliminate prospective confusion in indexes we align them
+        :param original_tokens: clean sequence of tokens
+        :param bert_tokens: sequence of tokenization results for transformer model
+        :return: tuple of following elements:
+                result of alignment: "[CLS]", "I'm", "going", "home", ".", "[SEP]";
+                alignment map, specifies combination indexes: {0: [0], 1: [1, 2, 3], 2: [4], 3:[5], 4: [6], 5: [7]}
+        """
+        new_set = [bert_tokens[0]] + original_tokens + [bert_tokens[-1]]
 
-    def inference(self, user_choices):
-        epoch_choice = self.decision_maker(user_choices)
-        self.load_model(epoch_choice)
-        input_sentence = input('Please provide your text: ')
-        tokenized_text = word_tokenize(input_sentence)
-        encoded_text = self.process_text(tokenized_text)
-        input_tensor = torch.LongTensor(encoded_text).to(self.device)
-        output = self.classifier(input_tensor)
-        predictions = torch.argmax(output, -1).tolist()
-        result = self.decode_prediction(predictions)
+        result_list = list()
+        alignment_map = dict()
+        bert_idx = 0
+        for idx, token in enumerate(new_set):
+            alignment_map[idx] = [bert_idx]
 
-        print(result[0: len(tokenized_text)])
+            if token == bert_tokens[bert_idx]:
+                result_list.append(token)
+                bert_idx += 1
+            else:
+                tok = bert_tokens[bert_idx]
+                for cur_idx in range(bert_idx + 1, len(bert_tokens)):
+                    tok += bert_tokens[cur_idx]
+                    alignment_map[idx].append(cur_idx)
+                    if tok == token:
+                        result_list.append(tok)
+                        bert_idx = cur_idx + 1
+                        break
 
+        return result_list, alignment_map
 
+    @staticmethod
+    def clean_model_input(model_text: list):
+        """
+        Model is utilized to fix ## tokenization as a result of AutoTokenizer usage. It happens when the longer words
+        are given as input to the tokenizer. The first syllable will be without ## and the rest will be as starting with
+        ##. This method cleans them and returns clean version. The rest will be handled by pretty combiner method, if
+        needed.
+        Example: "[CLS]", "I", "do", "some", "am", "##bi", "##gu", "##ous", "works", "[SEP]"
+        Result: "[CLS]", "I", "do", "some", "am", "##bi", "##gu", "##ous", "works", "[SEP]"
+        After pretty combiner: '[CLS]', 'I', 'do', 'some', 'ambiguous', 'works', '[SEP]'
+        Alignment map: {0: [0], 1: [1], 2: [2], 3: [3], 4: [4, 5, 6, 7], 5: [8], 6: [9]}
+        :param model_text: list of tokens as output of the tokenizer
+        :return: list of clean tokens (in case ## was detected, otherwise input itself)
+        """
+        result = list()
+        for token in model_text:
+            if '##' in token:
+                result.append(token.replace('##', ''))
+            else:
+                result.append(token)
+        return result
+
+    def process_input(self, input_text: str) -> tuple:
+        """
+        Method is utilized to process the input text, which is provided by user as a sequence of characters. Then it
+        will be put into the desired shape to perform classification.
+        :param input_text: string object as an input sequence of characters
+        :return: tuple of the following elements:
+                clean_text: list of pretty combined tokens
+                alignment_map: dictionary of alignment setup
+                model_input: data can be used as model input
+        """
+
+        original_tokens = word_tokenize(input_text)
+        main_tokens = self.pretty_combiner(original_tokens)
+
+        model_input = self.process.tokenizer(input_text)
+        alignment_model_data = self.clean_model_input(model_input.tokens())
+        clean_text, alignment_map = self.make_alignment(main_tokens, alignment_model_data)
+        return clean_text, alignment_map, model_input
+
+    def process_out(self, clean_data: list, alignment_map: dict, predictions: torch.Tensor) -> None:
+        """
+        Method is utilized to process the output of the model for each scenario that can occur
+        :param clean_data: list of pretty combined tokens
+        :param alignment_map: dictionary for alignment setup
+        :param predictions: prediction tensor with padding elements removed
+        :return: Nothing, it just prints the output
+        """
+        prediction_result = list()
+
+        for idx, token in enumerate(clean_data):
+
+            if len(alignment_map[idx]) == 1:
+
+                result = torch.argmax(predictions[:, alignment_map[idx][0], :], -1).item()
+
+                prediction_result.append(result)
+
+            else:
+                init = 3 * predictions[:, alignment_map[idx][0]]
+
+                summed = init + torch.sum(predictions[:, alignment_map[idx][1:len(alignment_map[idx])], :], 1)
+                prediction_result.append(torch.argmax(summed, -1).item())
+
+        decoded = [self.hp['id2label'][idx] for idx in prediction_result]
+        result = [(token, decoded[idx]) for idx, token in enumerate(clean_data)]
+        print(clean_data[1: len(clean_data)])
+        print(result[1: len(result)])
+
+    def infer(self, infer_parameters):
+        user_choice = self.decision_maker(infer_parameters)
+        self.load_model(user_choice)
+        input_text = input('Please provide your text: ')
+        clean_text, alignment_map, model_input = self.process_input(input_text)
+
+        input_data = self.collator([each for each in [model_input]])
+        predictions = self.classifier(input_data['input_ids'].to(self.device),
+                                      input_data['attention_mask'].to(self.device))
+        non_pad_out = predictions[:, 0: len(model_input.tokens()), :]
+
+        self.process_out(clean_text, alignment_map, non_pad_out)
