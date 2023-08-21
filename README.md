@@ -2,9 +2,9 @@
 ## Goal
 The main goal of the Named Entity Recognition task is to utilize Natural Language Processing methods to identify named entities in the given texts. In our project, the model is BERT-based classifier to identify named entities in the given texts.
 ## Model 
-We developed BERT-based classifier for token classification task. BERT model from [HuggingFace](www.huggingface.com) was utilized as an encoder for this purpose. Hidden states of the model was provided to the FCN layer with shape of (hidden_size * num_classes), where hidden_size and num_classes stand for last hidden state dimension of the Transformer model and number of Named Entities in the dataset (9)
+We developed BERT-based classifier for token classification task. BERT model from [HuggingFace](https://huggingface.co) was utilized as an encoder for this purpose. Hidden states of the model was provided to the FCN layer with shape of (hidden_size * num_classes), where hidden_size and num_classes stand for last hidden state dimension of the Transformer model and number of Named Entities in the dataset (9)
 ## Dataset
-Project makes use of [conllpp](https://huggingface.co/datasets/conllpp) dataset from [HuggingFace](https://huggingface.com). As it is given in the source website, data splits were already made by authors. Explicitly, train, test and validation datasets include 14k, 3.45k and 3.25k sequences with their token labels, respectively. Class identification can be seen below:
+Project makes use of [conllpp](https://huggingface.co/datasets/conllpp) dataset from [HuggingFace](https://huggingface.co). As it is given in the source website, data splits were already made by authors. Explicitly, train, test and validation datasets include 14k, 3.45k and 3.25k sequences with their token labels, respectively. Class identification can be seen below:
 
        O:       0 =>  For other common tokens, which don't stand for any entity
        B-PER:   1 =>  Initial token of entity specifies Person
