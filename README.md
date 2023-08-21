@@ -88,9 +88,9 @@ After you direct yourself into some folder that you want to add this model, you 
   python main.py --experiment_num 1 --train --epochs 3 --stats --statistics_data_choice validation --infer --load_best --load_choice f1_macro
   ```
   This snippet will do following steps:
-         1. Train the model for 3 epochs and save results in results/experiment_1
-         2. Provide statistics and visualize results (confusion matrix)
-         3. Ask you provide a text for entity recognition
+         * Train the model for 3 epochs and save results in results/experiment_1
+         * Provide statistics and visualize results (confusion matrix)
+         * Ask you provide a text for entity recognition
 
  
  ***Regards,***
