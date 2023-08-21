@@ -97,7 +97,7 @@ After you direct yourself into some folder that you want to add this model, you 
 
 ## Useful Data:
 * You can reach to the best epoch checkpoint of the model (based on F1 score) from the [model checkpoint](https://drive.google.com/file/d/1-ep48ThsTStxFBk5BmnQ99uULXD6F76i/view?usp=drive_link), which link is available for whom have the link. 
-* [NER_bert.ipynb](NER_bert.ipynb) and [ner_bert.ipynb](ner_bert.ipynb) notebooks are also provided in this repository. While the first one is the same code but in notebook format (for whom can follow easily from such format), the latter was developed as a guidance for 'run from terminal' manner. 
+* [ner_bert.ipynb](ner_bert.ipynb) and [ner_bert_terminal.ipynb](ner_bert_terminal.ipynb) notebooks are also provided in this repository. While the first one is the same code but in notebook format (for whom can follow easily from such format), the latter was developed as a guidance for 'run from terminal' manner. 
  
  ***Regards,***
 
