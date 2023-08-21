@@ -16,34 +16,47 @@ Project makes use of [conllpp](https://huggingface.co/datasets/conllpp) dataset 
        B-MISC:  7 =>  Initial token of entity specifies Miscallenous entity
        I-MISC:  8 =>  Intermediate token of entity specifies Miscallenous entity
 
+## Model Results:
+Basically the best results are as following (**Note: Model was fine tuned for 3 epochs only**):
+
+       f1_macro:       Obtained at the 3rd epoch;
+       dev_loss:       Obtained at the 2nd epoch
+       dev_accuracy:   Obtained at the 3rd epoch
+       
+
 ## How to run easily?
 After you direct yourself into some folder that you want to add this model, you can follow steps below step by step:
 
 * Initially, you need to pull the project into your local machine
+
   in Colab (or any other Notebook):
   ```python  
   !git clone git clone https://github.com/NamazovMN/NER-BERT.git
   ```
+
   in Terminal:
   ```python  
   git clone git clone https://github.com/NamazovMN/NER-BERT.git
   ```
-* Them, you should run the following snippet to install all required dependencies: 
+* Then, you should run the following snippet to install all required dependencies: 
+  in Colab (or any other Notebook):
+  ```python  
+  !pip install -r requirements.txt
+  ```
+  in Terminal:
+  ```python  
+  pip install -r requirements.txt
+  ```
+* In order to train, infer and show statistics the following snippet can be run. Notice that, further details of each step and parameters can be found in ipynb file:
+
   ```python
-  python main.py -r requirements.txt
-* Now you are all set to run the following snippet (Note: The source code can be found in [playground.py](src/playground.py).) 
-  ```python
-  python main.py --playground_only --experiment_number 27 --play_bis --cased --clean_stops --clean_punctuation
-  
- ## What is new?
- In order to see the result, we need to have tokenizer to split sentence into the words. In order to do this, I used BIS model that can be found in my repository. play_bis parameter in the code snippet that was given above activate it. If you do not set it, model will use NLTK tokenizer.
- 
- I hope you will enjoy it!
- 
- ## Trained model
- These following data can be downloaded from corresponding links, since they exceeds size limitation of GitHub: https://drive.google.com/drive/folders/1qS6Hb_eZdWiwc9NMSoEJc5jJztpksxKE?usp=sharing
- model_structure.pickle: you need to put it into the corresponding experiment directory
- model checkpoint: you need to put it into the checkpoints directory in the corresponding experiment path
+  python main.py --experiment_num 1 --train --epochs 3 --stats --statistics_data_choice validation --infer --load_best --load_choice f1_macro
+  ```
+  This snippet will do following steps:
+         1. Train the model for 3 epochs and save results in results/experiment_1
+         2. Provide statistics and visualize results (confusion matrix)
+         3. Ask you provide a text for entity recognition
+
  
  ***Regards,***
 
