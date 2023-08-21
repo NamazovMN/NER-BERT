@@ -1,10 +1,21 @@
 # Named Entity Recognition
 ## Goal
-The main goal of the project is, to classify tokens (words/phrases) in the provided sentences ino 4 classes of Named Entity Recognition, namely PER for person, ORG for Organization, LOC for location and O for others.
+The main goal of the Named Entity Recognition task is to utilize Natural Language Processing methods to identify named entities in the given texts. In our project, the model is BERT-based classifier to identify named entities in the given texts.
 ## Model 
-LSTM model along with FCN on the top of it was built for the classification task. If you check [model.py](src/model.py), you can see that model size is dynamic and is defined by user. I will mention how to do it in configuration section, later.
+We developed BERT-based classifier for token classification task. BERT model from [HuggingFace](www.huggingface.com) was utilized as an encoder for this purpose. Hidden states of the model was provided to the FCN layer with shape of (hidden_size * num_classes), where hidden_size and num_classes stand for last hidden state dimension of the Transformer model and number of Named Entities in the dataset (9)
 ## Dataset
-There is ambiguity about the confidentiality of the dataset, so that I cannot publish. I was provided by this dataset thanks to my academic classes. However I will provide playground techniques that you can check the resulting model.
+Project makes use of [conllpp](https://huggingface.co/datasets/conllpp) dataset from [HuggingFace](www.huggingface.com). As it is given in the source website, data splits were already made by authors. Explicitly, train, test and validation datasets include 14k, 3.45k and 3.25k sequences with their token labels, respectively. Class identification can be seen below:
+
+       O:       0 => For other common tokens, which don't stand for any entity
+       B-PER:   1 =>  Initial token of entity specifies Person
+       I-PER:   2 =>  Intermediate token of entity specifies Person
+       B-ORG:   3 =>  Initial token of entity specifies Organization
+       I-ORG:   4 =>  Intermediate token of entity specifies Organization
+       B-LOC:   5 =>  Initial token of entity specifies Location
+       I-LOC:   6 =>  Intermediate token of entity specifies Location
+       B-MISC:  7 =>  Initial token of entity specifies Miscallenous entity
+       I-MISC:  8 =>  Intermediate token of entity specifies Miscallenous entity
+
 ## Playground
 In order to test model you can follow the steps that are given: 
 * Initially, you need to pull the project into your local machine; 
