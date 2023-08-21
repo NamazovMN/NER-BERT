@@ -34,7 +34,7 @@ def set_parameters() -> Namespace:
                         help="Specifies removing punctuation elements from raw text")
     parser.add_argument('--stopwords', required=False, action='store_false', default=True,
                         help="Specifies removing stopwords")
-    parser.add_argument('--epochs', required=False, type=int, default=20,
+    parser.add_argument('--epochs', required=False, type=int, default=3,
                         help='Specifies number of epochs to train the model')
     parser.add_argument('--learning_rate', required=False, type=float, default=1e-4,
                         help="Specifies learning rate")
