@@ -56,6 +56,10 @@ def set_parameters() -> Namespace:
     parser.add_argument('--load_choice', required=False, type=str, default='f1_macro',
                         choices=['f1_macro', 'dev_loss', 'dev_accuracy'],
                         help="User's choice for the best model to load")
+    parser.add_argument('--stats', required=False, default='False', action='store_true')
+    parser.add_argument('--statistics_data_choice', required=False, type=str, default='test',
+                        choices=['test', 'validation'], help='Generating confusion matrix based on this data choice')
+
     # Model Parameters
 
     parser.add_argument('--dropout', required=False, type=float, default=0.3,
