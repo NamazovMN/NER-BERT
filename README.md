@@ -41,6 +41,24 @@ Initially we will provide confusion matices which were generated based on Valida
             <img src="results/experiment_6/outputs/confusion_validation_data_f1_macro.png" width="400" height="400">
             <img src="results/experiment_6/outputs/confusion_validation_data_f1_macro_none_o.png" width="400" height="400">
         </p>
+
+Confusion matrices based on the test dataset are given below:
+
+* Based on the best (minimum) validation loss, considering O label (left) and without O label (right):
+       <p align="center">
+            <img src="results/experiment_6/outputs/confusion_test_data_dev_loss.png" width="400" height="400">
+            <img src="results/experiment_6/outputs/confusion_test_data_dev_loss_none_o.png" width="400" height="400">
+        </p>
+* Based on the best (maximum) validation accuracy, considering O label (left) and without O label (right):
+       <p align="center">
+            <img src="results/experiment_6/outputs/confusion_test_data_dev_accuracy.png" width="400" height="400">
+            <img src="results/experiment_6/outputs/confusion_test_data_dev_accuracy_none_o.png" width="400" height="400">
+        </p>
+* Based on the best (maximum) F1 score, considering O label (left) and without O label (right):
+       <p align="center">
+            <img src="results/experiment_6/outputs/confusion_test_data_f1_macro.png" width="400" height="400">
+            <img src="results/experiment_6/outputs/confusion_test_data_f1_macro_none_o.png" width="400" height="400">
+        </p>
 ## How to run easily?
 After you direct yourself into some folder that you want to add this model, you can follow steps below step by step:
 
