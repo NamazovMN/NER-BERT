@@ -19,9 +19,9 @@ Project makes use of [conllpp](https://huggingface.co/datasets/conllpp) dataset 
 ## Model Results:
 Basically the best results are as following (**Note: Model was fine tuned for 3 epochs only**):
 
-       f1_macro:       Obtained at the 3rd epoch;
-       dev_loss:       Obtained at the 2nd epoch
-       dev_accuracy:   Obtained at the 3rd epoch
+       f1_macro:      0.9790 => Obtained at the 3rd epoch;
+       dev_loss:      0.0781 => Obtained at the 1st epoch;
+       dev_accuracy:  0.9261 => Obtained at the 3rd epoch;
        
 
 ## How to run easily?
