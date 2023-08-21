@@ -88,12 +88,16 @@ After you direct yourself into some folder that you want to add this model, you 
   python main.py --experiment_num 1 --train --epochs 3 --stats --statistics_data_choice validation --infer --load_best --load_choice f1_macro
   ```
   This snippet will do following steps:
-  ** Train the model for 3 epochs and save results in results/experiment_1
+  
+         Train the model for 3 epochs and save results in results/experiment_1
     
-  ** Provide statistics and visualize results (confusion matrix)
+         Provide statistics and visualize results (confusion matrix)
     
-  ** Ask you provide a text for entity recognition
+         Ask you provide a text for entity recognition
 
+## Useful Data:
+* You can reach to the best epoch checkpoint of the model (based on F1 score) from the [model checkpoint](https://drive.google.com/file/d/1-ep48ThsTStxFBk5BmnQ99uULXD6F76i/view?usp=drive_link), which link is available for whom have the link. 
+* [NER_bert.ipynb](NER_bert.ipynb) and [ner_bert.ipynb](ner_bert.ipynb) notebooks are also provided in this repository. While the first one is the same code but in notebook format (for whom can follow easily from such format), the latter was developed as a guidance for 'run from terminal' manner. 
  
  ***Regards,***
 
