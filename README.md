@@ -28,7 +28,7 @@ Initially we will provide confusion matices which were generated based on Valida
 
 Based on the best (minimum) validation loss, considering O label (left) and without O label (right):
 <p align="center">
-     <img src="results/experiment_6/outputs/confusion_validation_data_dev_loss.png" width="300" height="250">  <img src="results/experiment_6/outputs/confusion_validation_data_dev_loss_none_o.png" width="300" height="250">
+     <img src="results/experiment_6/outputs/confusion_validation_data_dev_loss.png" width="400" height="400">  <img src="results/experiment_6/outputs/confusion_validation_data_dev_loss_none_o.png" width="400" height="400">
  </p>
 
 
