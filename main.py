@@ -5,6 +5,8 @@ from src.process import DataProcess
 from src.train import Train
 import random
 from transformers import BertTokenizerFast
+from src.statistics import Statistics
+
 
 def __main__():
     random.seed(42)
@@ -22,7 +24,13 @@ def __main__():
     if project_parameters['train']:
         trainer = Train(hp, process, device, project_parameters['experiment_num'])
         trainer.train_model(project_parameters)
-    else:
+    if project_parameters['stats']:
+        stat_data = ['experiment_num', 'statistics_data_choice', 'stats']
+        statistics_parameters = {parameter: value for parameter, value in project_parameters.items()
+                                 if parameter in stat_data}
+        statistics = Statistics(hp, process, device, project_parameters['experiment_num'], 'validation')
+        statistics.show_statistics(statistics_parameters)
+    if project_parameters['infer']:
         infer_options = ['load_choice', 'load_best', 'epoch_choice', 'experiment_num']
         infer_parameters = {option: project_parameters[option] for option in infer_options}
         inference = Inference(hp, process, device, infer_parameters)
