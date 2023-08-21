@@ -22,7 +22,15 @@ Basically the best results are as following (**Note: Model was fine tuned for 3 
        f1_macro:      0.9790 => Obtained at the 3rd epoch;
        dev_loss:      0.0781 => Obtained at the 1st epoch;
        dev_accuracy:  0.9261 => Obtained at the 3rd epoch;
-       
+
+### Confusion Matrices:
+Initially we will provide confusion matices which were generated based on Validation dataset:
+
+Based on the best (minimum) validation loss, considering O label (left) and without O label (right):
+<p align="center">
+     <img src="results/experiment_1/confusion_validation_data_dev_loss.png" width="300" height="250">  <img src="results/experiment_1/confusion_validation_data_dev_loss_none_o.png" width="300" height="250">
+ </p>
+
 
 ## How to run easily?
 After you direct yourself into some folder that you want to add this model, you can follow steps below step by step:
